@@ -1,6 +1,6 @@
 # BDE-Finals
 
-Step 1: To start docker compose
+Step 1: To start docker compose <br>
 docker-compose up -d --build
 
 - verify all containers are up
