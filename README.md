@@ -3,7 +3,7 @@
 Step 1: To start docker compose <br>
 docker-compose up -d --build<br>
 
-- verify all containers are up <br>
+--verify all containers are up <br>
 docker ps
 
 Step 3: Install dashboard.py dependencies <br>
