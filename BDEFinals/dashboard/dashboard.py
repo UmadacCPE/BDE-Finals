@@ -36,6 +36,7 @@ def get_historical(hours=24):
     cursor = raw_col.find({"timestamp": {"$gte": cutoff.isoformat() + 'Z'}}).sort("timestamp", -1)
     df = pd.DataFrame(list(cursor))
     if not df.empty:
+        df = df.drop(columns=['_id'], errors='ignore')   # <-- FIX: Drop MongoDB ObjectId column
         df['timestamp'] = pd.to_datetime(df['timestamp'])
     return df
 
@@ -45,6 +46,7 @@ def get_latest_from_mongo(limit=200):
     cursor = raw_col.find().sort("timestamp", -1).limit(limit)
     df = pd.DataFrame(list(cursor))
     if not df.empty:
+        df = df.drop(columns=['_id'], errors='ignore')   # <-- FIX: Drop MongoDB ObjectId column
         df['timestamp'] = pd.to_datetime(df['timestamp'])
     return df
 
@@ -201,7 +203,7 @@ if page == "Live Stream":
                 barmode='group',
                 title="Latest Indicator Values by Country"
             )
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width='stretch')   # <-- FIX: deprecated parameter
         
         if df_live['timestamp'].nunique() > 1:
             st.subheader("Recent Updates")
@@ -213,10 +215,10 @@ if page == "Live Stream":
                 line_dash='indicator_name',
                 title="Values Over Time"
             )
-            st.plotly_chart(fig_line, use_container_width=True)
+            st.plotly_chart(fig_line, width='stretch')   # <-- FIX: deprecated parameter
         
         st.subheader("Recent Records")
-        st.dataframe(df_live.sort_values('timestamp', ascending=False).head(20))
+        st.dataframe(df_live.sort_values('timestamp', ascending=False).head(20), width='stretch')
     else:
         st.info("No live data yet. Ensure the producer is running and has fetched data.")
 
@@ -256,12 +258,12 @@ elif page == "Historical Analysis":
             line_dash='indicator_name',
             title="Indicator Trends"
         )
-        st.plotly_chart(fig_hist, use_container_width=True)
+        st.plotly_chart(fig_hist, width='stretch')   # <-- FIX: deprecated parameter
         
         if not df_hist.empty:
             st.subheader("Statistical Summary")
             summary = df_hist.groupby(['country_name', 'indicator_name'])['value'].agg(['mean', 'min', 'max', 'count']).round(2)
-            st.dataframe(summary, use_container_width=True)
+            st.dataframe(summary, width='stretch')
         
         st.subheader("Export Data")
         col1, col2, _ = st.columns([1,1,2])
@@ -273,6 +275,6 @@ elif page == "Historical Analysis":
                 st.markdown(export_data(df_hist, 'excel'), unsafe_allow_html=True)
         
         with st.expander("View All Historical Data"):
-            st.dataframe(df_hist.sort_values('timestamp', ascending=False))
+            st.dataframe(df_hist.sort_values('timestamp', ascending=False), width='stretch')
     else:
         st.warning("No historical data found. Ensure the consumer is running and storing data.")
